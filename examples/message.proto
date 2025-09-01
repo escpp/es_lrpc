@@ -1,0 +1,231 @@
+syntax = "proto3";
+
+// 生成只依赖libprotobuf-lite库的代码
+// option optimize_for = LITE_RUNTIME;
+package es_config;
+
+  // 系统配置proto定义，根据example.json转换
+message Configuration {
+  Vendor         vendor   = 1;
+  LogConfig      log      = 2;
+  BleConfig      ble      = 3;
+  WiFiConfig     wifi     = 4;
+  ApConfig       ap       = 5;
+  G4Config       g4       = 6;
+  EthConfig      eth      = 7;
+  NtpConfig      ntp      = 8;
+  GpioConfig     gpio     = 9;
+  OcppConfig     ocpp     = 10;
+  OtaConfig      ota      = 11;
+  UartConfig     uart     = 12;
+  NetworkConfig  network  = 13;
+  WorkModeConfig workmode = 14;
+  ChargerConfig  charger  = 15;
+}
+
+  // 厂家信息配置
+message Vendor {
+  string vendor_name = 1;  // 厂家名称，默认值:"深圳驿普乐氏科技有限公司"
+  string vendor_id   = 2;  // 厂家ID，默认值:"EN+"
+}
+
+  // 日志管理配置
+message LogConfig {
+  string path              = 1;  // 日志路径，默认值:"/sdcard/log"
+  uint32 file_size_limit   = 2;  // 单个日志文件大小限制(字节)，默认值:102410000
+  uint32 file_number_limit = 3;  // 日志文件数量限制，默认值:10
+  uint32 total_size_limit  = 4;  // 日志总大小限制(字节)，默认值:2048000000
+}
+
+  // 蓝牙配置
+message BleConfig {
+  bool enable = 1;  // 是否启用蓝牙(true=启用, false=禁用)
+}
+
+  // WiFi配置
+message WiFiConfig {
+    // 加密类型(0=NONE, 1=WPA2, 2=WPA3)
+  enum EncryptionType {
+    NONE = 0;
+    WPA2 = 1;
+    WPA3 = 2;
+  }
+
+    // 无线模式(0=AUTO, 1=b/g/n, 2=b/g)
+  enum ProtocolType {
+    AUTO  = 0;
+    B_G_N = 1;
+    B_G   = 2;
+  }
+
+  string         ssid       = 1;  // SSID名称，默认值:"en-test"
+  string         password   = 2;  // 连接密码，默认值:"en-test@888888"
+  EncryptionType encryption = 3;
+  ProtocolType   protocol   = 4;
+  bool           enable     = 5;
+}
+
+  // AP热点配置
+message ApConfig {
+    // 加密类型(0=NONE, 1=WPA2, 2=WPA3)
+  enum EncryptionType {
+    NONE = 0;
+    WPA2 = 1;
+    WPA3 = 2;
+  }
+    // 无线模式(0=AUTO, 1=b/g/n, 2=b/g)
+  enum ProtocolType {
+    AUTO  = 0;
+    B_G_N = 1;
+    B_G   = 2;
+  }
+
+  string         ssid       = 1;
+  string         password   = 2;
+  EncryptionType encryption = 3;
+  ProtocolType   protocol   = 4;
+  bool           enable     = 5;
+}
+
+  // 4G模块配置
+message G4Config {
+  string model       = 1;  // 模块型号，默认值:"EG915Q"
+  string config_path = 2;  // 配置文件路径，默认值:"/etc/4g.conf"
+  string reset_gpio  = 3;  // 复位引脚，默认值:"gpio.4g_reset"
+  string at_port     = 4;  // AT指令串口，默认值:"uart.4g_at"
+  bool   enable      = 5;
+}
+
+  // 以太网配置
+message EthConfig {
+  bool     enable            = 1;
+  string   static_ip         = 2;  // 静态IP地址，默认值:"192.168.1.100"
+  string   static_gateway    = 3;  // 网关地址，默认值:"192.168.1.1"
+  string   static_netmask    = 4;  // 子网掩码，默认值:"255.255.255.0"
+  repeated string static_dns = 5;  // DNS服务器列表
+  bool     dhcp              = 6;  // 是否启用DHCP
+}
+
+  // NTP配置
+message NtpConfig {
+  repeated string server_list = 1;  // NTP服务器列表
+  uint32   interval           = 2;  // 同步间隔(秒)，默认值:60
+  bool     enable             = 3;
+}
+
+  // GPIO配置
+message GpioConfig {
+  message GpioPin {
+    uint32 number     = 1;  // 引脚号，默认值:40
+    bool   is_output  = 2;  // 是否为输出模式
+    bool   is_on1off0 = 3;  // 电平定义(true=高电平有效, false=低电平有效)
+  }
+
+  GpioPin g4_reset   = 1;
+  GpioPin sys_reset  = 2;
+  GpioPin ems_rw_485 = 3;
+}
+
+  // OCPP配置
+message OcppConfig {
+  string url       = 1;  // 连接URL，默认值:"ws://test.com:8888/iot/charge/ac"
+  string host      = 2;
+  uint32 port      = 3;
+  string path      = 4;
+  uint32 profile   = 5;  // profile等级，默认值:0
+  string cert_path = 6;  // 证书路径，默认值:"/etc/ocpp_cert.pem"
+  bool   enable    = 7;
+}
+
+  // OTA配置
+message OtaConfig {
+  string download_path = 1;  // 下载目录，默认值:"/ota/download"
+  string cert_path     = 2;  // 证书路径，默认值:"/etc/ota_cert.pem"
+  bool   enable        = 3;
+}
+
+  // 串口配置
+message UartConfig {
+    // 校验位(0=NONE, 1=ODD, 2=EVEN)
+  enum Parity {
+    NONE = 0;
+    ODD  = 1;
+    EVEN = 2;
+  }
+    // 停止位(1=1位, 2=1.5位, 3=2位)
+  enum StopBits {
+    STOPBIT_INVALID = 0;
+    ONE          = 1;
+    ONE_AND_HALF = 2;
+    TWO          = 3;
+  }
+    // 波特率(1200,2400,4800,9600,19200,38400,57600,115200,230400,460800,921600)
+  enum BaudRate {
+    BOAUD_INVALID = 0;
+    BAUD_1200   = 1200;
+    BAUD_2400   = 2400;
+    BAUD_4800   = 4800;
+    BAUD_9600   = 9600;
+    BAUD_19200  = 19200;
+    BAUD_38400  = 38400;
+    BAUD_57600  = 57600;
+    BAUD_115200 = 115200;
+    BAUD_230400 = 230400;
+    BAUD_460800 = 460800;
+    BAUD_921600 = 921600;
+  }
+
+  message UartSetting {
+
+    string   path     = 1;  // 设备路径，默认值:"/dev/ttyS1"
+    BaudRate baudrate = 2;  // 波特率，默认值:BAUD_115200
+    uint32   bsize    = 3;  // 数据位长度(5-8 bits)，默认值:8
+    Parity   parity   = 4;  // 校验位，默认值:NONE
+    StopBits stopbit  = 5;  // 停止位，默认值:1
+    bool     is_485   = 6;  // 是否为485接口，默认值:false
+    string   rw_485   = 7;  // 485方向控制GPIO名称,默认值:"gpio.485_rw"
+  }
+
+  UartSetting ccu_control  = 1;
+  UartSetting ccu_debug    = 2;
+  UartSetting rfid_control = 3;
+  UartSetting pos_control  = 4;
+  UartSetting g4_at        = 5;
+}
+
+  // 网络类型配置
+message NetworkConfig {
+    // 联网类型(0=不联网，1=eth, 2=wifi, 3=4g, 4=eth+wifi, 5=eth+4g, 6=eth+wifi+4g, 7=wifi+4g)
+  enum NetworkType {
+    NONE        = 0;
+    ETH         = 1;
+    WIFI        = 2;
+    G4          = 3;
+    ETH_WIFI    = 4;
+    ETH_G4      = 5;
+    ETH_WIFI_G4 = 6;
+    WIFI_G4     = 7;
+  }
+  NetworkType net_type = 1;
+}
+
+  // 工作模式配置
+message WorkModeConfig {
+    // 工作模式(0=联网充电，5=蓝牙充电，6=EMS模式)
+  enum WorkMode {
+    ONLINE_CHARGE    = 0;
+    BLUETOOTH_CHARGE = 5;
+    EMS_MODE         = 6;
+  }
+  WorkMode work_mode = 1;
+}
+
+  // 充电器配置
+message ChargerConfig {
+  string model       = 1;  // 充电器型号，默认值:"AC7000-220-AB"
+  uint32 max_current = 2;  // 最大电流(A)，默认值:32
+  uint32 min_current = 3;  // 最小电流(A)，默认值:6
+  uint32 max_voltage = 4;  // 最大电压(V)，默认值:220
+  uint32 min_voltage = 5;  // 最小电压(V)，默认值:180
+  uint32 max_power   = 6;  // 最大功率(W)，默认值:7000
+}
